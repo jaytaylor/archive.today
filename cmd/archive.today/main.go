@@ -31,7 +31,6 @@ func init() {
 	rootCmd.PersistentFlags().DurationVarP(&WaitTimeout, "wait-timeout", "", WaitTimeout, "Maximum wait duration, only applies when -w/--wait is active (default: infinite)")
 	rootCmd.PersistentFlags().BoolVarP(&Anyway, "anyway", "a", false, "Force archival even if there is already a recent snapshot of the page")
 	rootCmd.PersistentFlags().StringVarP(&archivetoday.BaseURL, "base-url", "b", archivetoday.BaseURL, "Archive.today server base hostname / URL address")
-	rootCmd.PersistentFlags().StringVarP(&archivetoday.HTTPHost, "http-host", "", archivetoday.HTTPHost, "'Host' header to use")
 	rootCmd.PersistentFlags().StringVarP(&archivetoday.UserAgent, "user-agent", "u", archivetoday.UserAgent, "'User-Agent' header to use")
 	rootCmd.PersistentFlags().StringVarP(&submitID, "submitid", "s", "", "Manually specify submitid value to use")
 }

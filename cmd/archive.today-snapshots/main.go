@@ -24,7 +24,6 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "Activate verbose log output")
 	rootCmd.PersistentFlags().DurationVarP(&RequestTimeout, "request-timeout", "r", RequestTimeout, "Timeout duration for HTTP requests")
 	rootCmd.PersistentFlags().StringVarP(&archivetoday.BaseURL, "base-url", "b", archivetoday.BaseURL, "Archive.today server base hostname / URL address")
-	rootCmd.PersistentFlags().StringVarP(&archivetoday.HTTPHost, "http-host", "", archivetoday.HTTPHost, "'Host' header to use")
 	rootCmd.PersistentFlags().StringVarP(&archivetoday.UserAgent, "user-agent", "u", archivetoday.UserAgent, "'User-Agent' header to use")
 }
 

@@ -16,11 +16,10 @@ import (
 )
 
 var (
-	BaseURL               = "https://archive.today"                                                                                                    // Overrideable default package value.
-	HTTPHost              = "archive.today"                                                                                                            // Overrideable default package value.
-	UserAgent             = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.162 Safari/537.36" // Overrideable default package value.
-	DefaultRequestTimeout = 10 * time.Second                                                                                                           // Overrideable default package value.
-	DefaultPollInterval   = 5 * time.Second                                                                                                            // Overrideable default package value.
+	BaseURL               = "https://archive.today"                                                                          // Overrideable default package value.
+	UserAgent             = "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:89.0) Gecko/20100101 Firefox/89.0" // Overrideable default package value.
+	DefaultRequestTimeout = 10 * time.Second                                                                                 // Overrideable default package value.
+	DefaultPollInterval   = 5 * time.Second                                                                                  // Overrideable default package value.
 
 	jsLocationExpr = regexp.MustCompile(`document\.location\.replace\(["']([^"']+)`)
 )
@@ -131,10 +130,34 @@ func Capture(u string, cfg ...Config) (string, error) {
 }
 
 // newSubmitID gets the index page and extracts the form submission identifier.
+// Also detects BaseURL redirects and updates the global value accordingly.
 func newSubmitID(timeout time.Duration) (string, error) {
-	_, body, err := doRequest("", BaseURL, nil, timeout)
+	resp, body, err := doRequest("", BaseURL, nil, timeout)
 	if err != nil {
 		return "", err
+	}
+
+	log.Warnf("status=%s BODY=%s", resp.StatusCode, string(body))
+	if resp.StatusCode/100 == 3 {
+		// Update base URL value and follow redirect.
+		if loc := resp.Header.Get("Location"); len(loc) == 0 {
+			return "", fmt.Errorf("received a redirect status-code %v with an empty Location header", resp.StatusCode)
+		} else {
+			newBaseURL := strings.TrimRight(loc, "/")
+			log.Debugf("Detected BaseURL redirect from %s -> %s", BaseURL, newBaseURL)
+			BaseURL = newBaseURL
+		}
+
+		resp, body, err = doRequest("", BaseURL, nil, timeout)
+		if err != nil {
+			return "", err
+		}
+		if resp.StatusCode/100 == 3 {
+			log.Infof("UNEXP REDIR: %s", resp.Header.Get("Location"))
+		}
+		if resp.StatusCode/100 != 2 {
+			return "", fmt.Errorf("received non-2xx status code: %d while attempting to fetch %q", resp.StatusCode, BaseURL)
+		}
 	}
 
 	doc, err := goquery.NewDocumentFromReader(bytes.NewBuffer(body))
@@ -199,7 +222,8 @@ func checkCrawlResult(body []byte) error {
 	}
 	if block := doc.Find("html > body > div").First(); block != nil {
 		if text := strings.Trim(block.Text(), "\r\n\t "); text == "Error: Network error." {
-			return fmt.Errorf("%s crawl result: Network Error", HTTPHost)
+			hostname := strings.Split(strings.Split(BaseURL, "://")[1], "/")[0]
+			return fmt.Errorf("%s crawl result: Network Error", hostname)
 		}
 	}
 	return nil

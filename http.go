@@ -24,7 +24,7 @@ func doRequest(method string, url string, body io.ReadCloser, timeout time.Durat
 	}
 
 	cc, _ := http2curl.GetCurlCommand(req)
-	log.Debugf("Equivalent command: %v", cc)
+	log.Debugf("Equivalent shell command: %v", cc)
 
 	client := newClient(timeout)
 	resp, err := client.Do(req)
@@ -32,6 +32,8 @@ func doRequest(method string, url string, body io.ReadCloser, timeout time.Durat
 		return resp, nil, fmt.Errorf("executing request: %s", err)
 	}
 	if resp.StatusCode/100 != 2 && resp.StatusCode/100 != 3 {
+		respBody, _ := ioutil.ReadAll(resp.Body)
+		log.Debugf("Unhappy response body: %s", string(respBody))
 		return resp, nil, fmt.Errorf("%v request to %v received unhappy response status-code=%v", method, url, resp.StatusCode)
 	}
 	respBody, err := ioutil.ReadAll(resp.Body)
@@ -50,8 +52,6 @@ func newRequest(method string, url string, body io.ReadCloser) (*http.Request, e
 		return nil, fmt.Errorf("creating %v request to %v: %s", method, url, err)
 	}
 
-	req.Host = HTTPHost
-
 	hostname := strings.Split(BaseURL, "://")[1]
 	req.Header.Set("Host", hostname)
 	req.Header.Set("Origin", hostname)
@@ -66,6 +66,10 @@ func newRequest(method string, url string, body io.ReadCloser) (*http.Request, e
 func newClient(timeout time.Duration) *http.Client {
 	c := &http.Client{
 		Timeout: timeout,
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			// Disable automatic redirect following in golang http client.
+			return http.ErrUseLastResponse
+		},
 		Transport: &http.Transport{
 			Proxy: http.ProxyFromEnvironment,
 			Dial: (&net.Dialer{
