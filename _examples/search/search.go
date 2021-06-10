@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/jaytaylor/archive.is"
+	"jaytaylor.com/archive.today"
 )
 
 var searchURL = "https://jaytaylor.com/"
 
 func main() {
-	snapshots, err := archiveis.Search(searchURL, 10*time.Second)
+	snapshots, err := archivetoday.Search(searchURL, 10*time.Second)
 	if err != nil {
 		panic(err)
 	}

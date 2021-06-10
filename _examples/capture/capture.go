@@ -3,13 +3,13 @@ package main
 import (
 	"fmt"
 
-	"github.com/jaytaylor/archive.is"
+	"jaytaylor.com/archive.today"
 )
 
 var captureURL = "https://jaytaylor.com/"
 
 func main() {
-	archiveURL, err := archiveis.Capture(captureURL)
+	archiveURL, err := archivetoday.Capture(captureURL)
 	if err != nil {
 		panic(err)
 	}

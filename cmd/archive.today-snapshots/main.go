@@ -8,23 +8,24 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"jaytaylor.com/archive.is"
+
+	"jaytaylor.com/archive.today"
 )
 
 var (
 	Quiet          bool
 	Verbose        bool
 	Wait           bool
-	RequestTimeout time.Duration = archiveis.DefaultRequestTimeout
+	RequestTimeout time.Duration = archivetoday.DefaultRequestTimeout
 )
 
 func init() {
 	rootCmd.PersistentFlags().BoolVarP(&Quiet, "quiet", "q", false, "Activate quiet log output")
 	rootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "Activate verbose log output")
 	rootCmd.PersistentFlags().DurationVarP(&RequestTimeout, "request-timeout", "r", RequestTimeout, "Timeout duration for HTTP requests")
-	rootCmd.PersistentFlags().StringVarP(&archiveis.BaseURL, "base-url", "b", archiveis.BaseURL, "Archive.is server base URL address")
-	rootCmd.PersistentFlags().StringVarP(&archiveis.HTTPHost, "http-host", "", archiveis.HTTPHost, "'Host' header to use")
-	rootCmd.PersistentFlags().StringVarP(&archiveis.UserAgent, "user-agent", "u", archiveis.UserAgent, "'User-Agent' header to use")
+	rootCmd.PersistentFlags().StringVarP(&archivetoday.BaseURL, "base-url", "b", archivetoday.BaseURL, "Archive.today server base hostname / URL address")
+	rootCmd.PersistentFlags().StringVarP(&archivetoday.HTTPHost, "http-host", "", archivetoday.HTTPHost, "'Host' header to use")
+	rootCmd.PersistentFlags().StringVarP(&archivetoday.UserAgent, "user-agent", "u", archivetoday.UserAgent, "'User-Agent' header to use")
 }
 
 func main() {
@@ -34,15 +35,15 @@ func main() {
 }
 
 var rootCmd = &cobra.Command{
-	Use:   "archive.is-snapshots",
-	Short: "search for archive.is snapshots",
-	Long:  "command-line interface for searching archive.is for URL page snapshots",
+	Use:   "archive.today-snapshots",
+	Short: "search for archive.today snapshots",
+	Long:  "command-line interface for searching archive.today for URL page snapshots",
 	Args:  cobra.MinimumNArgs(1),
 	PreRun: func(_ *cobra.Command, _ []string) {
 		initLogging()
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		snapshots, err := archiveis.Search(args[0], RequestTimeout)
+		snapshots, err := archivetoday.Search(args[0], RequestTimeout)
 		if err != nil {
 			errorExit(err)
 		}

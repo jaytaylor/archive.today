@@ -1,4 +1,4 @@
-package archiveis
+package archivetoday
 
 import (
 	"bytes"
@@ -16,8 +16,8 @@ import (
 )
 
 var (
-	BaseURL               = "https://archive.is"                                                                                                       // Overrideable default package value.
-	HTTPHost              = "archive.is"                                                                                                               // Overrideable default package value.
+	BaseURL               = "https://archive.today"                                                                                                    // Overrideable default package value.
+	HTTPHost              = "archive.today"                                                                                                            // Overrideable default package value.
 	UserAgent             = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.162 Safari/537.36" // Overrideable default package value.
 	DefaultRequestTimeout = 10 * time.Second                                                                                                           // Overrideable default package value.
 	DefaultPollInterval   = 5 * time.Second                                                                                                            // Overrideable default package value.
@@ -35,7 +35,7 @@ type Config struct {
 	SubmitID       string        // Accepts a user-provided submitid.
 }
 
-// Capture archives the provided URL using the archive.is service.
+// Capture archives the provided URL using the archive.today service.
 func Capture(u string, cfg ...Config) (string, error) {
 	timeout := DefaultRequestTimeout
 	if len(cfg) > 0 && cfg[0].RequestTimeout > time.Duration(0) {
@@ -191,7 +191,7 @@ func waitForCrawlToFinish(url string, body []byte, requestTimeout time.Duration,
 	return nil
 }
 
-// checkCrawlResult searches for known archive.is errors in HTML content.
+// checkCrawlResult searches for known archive.today errors in HTML content.
 func checkCrawlResult(body []byte) error {
 	doc, err := goquery.NewDocumentFromReader(bytes.NewBuffer(body))
 	if err != nil {
@@ -199,7 +199,7 @@ func checkCrawlResult(body []byte) error {
 	}
 	if block := doc.Find("html > body > div").First(); block != nil {
 		if text := strings.Trim(block.Text(), "\r\n\t "); text == "Error: Network error." {
-			return fmt.Errorf("archive.is crawl result: Network Error")
+			return fmt.Errorf("%s crawl result: Network Error", HTTPHost)
 		}
 	}
 	return nil

@@ -1,6 +1,6 @@
 // +build integration
 
-package archiveis
+package archivetoday
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	page     = "https://github.com/jaytaylor/archive.is"
+	page     = "https://github.com/jaytaylor/archive.today"
 	maxSleep = 60
 )
 
